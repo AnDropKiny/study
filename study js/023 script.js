@@ -40,7 +40,7 @@ let count = personalMovieDB.count;
 
 function rememberMyFilms() {
     do {
-        lastFilm = prompt('Один из последних просмотренных фильмов?');
+        lastFilm = prompt('Один из последних просмотренных фильмов?').trim();
         filmScore = prompt('На сколько оцените его?');
 
         if (!lastFilm || lastFilm.length <= 3 || lastFilm.length > 50) {
