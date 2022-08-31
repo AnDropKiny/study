@@ -26,8 +26,7 @@ let personalMovieDB = {
     genres: [],
     privat: false,
     start: function () {
-        let numberOfFilms;
-        numberOfFilms = +prompt("Сколько фильмов вы уже посмотрели?", "");
+        let numberOfFilms = +prompt("Сколько фильмов вы уже посмотрели?", "");
 
         while (numberOfFilms == "" || numberOfFilms == null || isNaN(numberOfFilms)) {
             numberOfFilms = +prompt("Сколько фильмов вы уже посмотрели?", "");
