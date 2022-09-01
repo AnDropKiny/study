@@ -79,7 +79,7 @@ function detectPersonalLevel() {
 // detectPersonalLevel();
 
 function showMyDB(privat) {
-    if (!privat) console.log(personalMovieDB);
+    if (!privat) { console.log(personalMovieDB); }
 }
 
 showMyDB(personalMovieDB.privat);
