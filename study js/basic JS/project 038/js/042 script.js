@@ -28,9 +28,6 @@ window.addEventListener("load", () => {
             "Скотт Пилигрим против..."
         ]
     };
-
-
-
     let interactiveForm = document.forms[1];
     let interactiveButton = interactiveForm.elements[2];
     let filmsList = document.querySelector(".promo__interactive-list");
@@ -57,6 +54,7 @@ window.addEventListener("load", () => {
             input1.placeholder = "Вы не ввели название фильма";
         }
     });
+
     function makeChanges() {
         let advBlock = document.querySelector(".promo__adv");
         document.querySelector(".promo__genre").textContent = "Драма";
@@ -77,6 +75,7 @@ window.addEventListener("load", () => {
             });
         });
     }
+
     function createMovieList(films, parent) {
         parent.innerHTML = "";
         movieDB.movies.sort();
