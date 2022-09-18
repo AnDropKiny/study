@@ -314,10 +314,10 @@ window.addEventListener("load", () => {
     }
 
     next.addEventListener("click", () => {
-        if (offset == +width.replace(/\d/g, '') * (slides.length - 1)) {
+        if (offset == +width.replace(/\D/g, '') * (slides.length - 1)) {
             offset = 0;
         } else {
-            offset += +width.replace(/\d/g, '');
+            offset += +width.replace(/\D/g, '');
         }
 
         if (sliderIndex == slides.length) {
@@ -330,9 +330,9 @@ window.addEventListener("load", () => {
     });
     prev.addEventListener("click", () => {
         if (offset == 0) {
-            offset = +width.replace(/\d/g, '') * (slides.length - 1);
+            offset = +width.replace(/\D/g, '') * (slides.length - 1);
         } else {
-            offset -= +width.replace(/\d/g, '');
+            offset -= +width.replace(/\D/g, '');
         }
 
         if (sliderIndex == 1) {
@@ -348,7 +348,7 @@ window.addEventListener("load", () => {
         dot.addEventListener("click", (e) => {
             const slideTo = e.target.getAttribute("data-slide-to");
             sliderIndex = slideTo;
-            offset = +width.replace(/\d/g, '') * (slideTo - 1);
+            offset = +width.replace(/\D/g, '') * (slideTo - 1);
 
             switchSlide();
             switchDotOpacity();
@@ -358,9 +358,41 @@ window.addEventListener("load", () => {
     /// Calc
 
     let result = document.querySelector(".calculating__result span");
-    let sex = 'female',
-        height, weight, age,
+    let sex, height, weight, age, ratio;
+
+    if (localStorage.getItem("sex")) {
+        sex = localStorage.getItem("sex");
+
+    }
+    else {
+        sex = "female";
+        localStorage.setItem('sex', 'female');
+    }
+
+    if (localStorage.getItem("ratio")) {
+        ratio = localStorage.getItem("ratio");
+    }
+    else {
         ratio = 1.375;
+        localStorage.setItem('ratio', 1.375);
+    }
+
+    function initLocalSettings(selector, classActive) {
+        let elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.classList.remove(classActive);
+            if (elem.getAttribute('id') === localStorage.getItem("sex")) {
+                elem.classList.add(classActive);
+            }
+            if (elem.getAttribute('data-ratio') === localStorage.getItem("ratio")) {
+                elem.classList.add(classActive);
+            }
+        });
+    }
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
 
     function calcTotal() {
         if (!sex || !height || !weight || !age || !ratio) {
@@ -382,7 +414,7 @@ window.addEventListener("load", () => {
         }
     }
     function getStaticInformation(parentElem, classActive) {
-        let elements = document.querySelectorAll(`${parentElem} div`);
+        let elements = document.querySelectorAll(parentElem);
 
         elements.forEach(elem => {
             elem.addEventListener('click', (e) => {
@@ -391,54 +423,40 @@ window.addEventListener("load", () => {
                 });
                 if (e.target.getAttribute('data-ratio')) {
                     ratio = +e.target.getAttribute('data-ratio');
-                    e.target.classList.add(classActive);
-                    calcTotal();
+                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio'));
                 }
-                else if (e.target.getAttribute('id')) {
+                else {
                     sex = e.target.getAttribute('id');
-                    e.target.classList.add(classActive);
-                    calcTotal();
+                    localStorage.setItem('sex', e.target.getAttribute('id'));
                 }
-                console.log(sex, ratio);
+                e.target.classList.add(classActive);
+                calcTotal();
             });
         });
     }
-    getStaticInformation('#gender', 'calculating__choose-item_active');
-    getStaticInformation('.calculating__choose_big', 'calculating__choose-item_active');
+    getStaticInformation('#gender div', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
 
     function getDynamicInformation(parentElem) {
-        let element = document.querySelector(parentElem);
-        element.addEventListener("input", (e) => {
+        let input = document.querySelector(parentElem);
+        input.addEventListener("input", (e) => {
+
+            if (input.value.match(/\D/g)) {
+                input.style.border = "1px solid red";
+            }
+            else {
+                input.style.border = "none";
+            }
+
             switch (e.target.getAttribute('id')) {
                 case 'height':
-                    if (+element.value) {
-                        height = element.value;
-                        element.style.border = "";
-                    }
-                    else {
-                        element.style.border = "1px solid red";
-                        height = null;
-                    }
+                    height = +input.value;
                     break;
                 case 'weight':
-                    if (+element.value) {
-                        weight = element.value;
-                        element.style.border = "";
-                    }
-                    else {
-                        element.style.border = "1px solid red";
-                        weight = null;
-                    }
+                    weight = +input.value;
                     break;
                 case 'age':
-                    if (+element.value) {
-                        age = element.value;
-                        element.style.border = "";
-                    }
-                    else {
-                        element.style.border = "1px solid red";
-                        age = null;
-                    }
+                    age = +input.value;
                     break;
             }
             calcTotal();
