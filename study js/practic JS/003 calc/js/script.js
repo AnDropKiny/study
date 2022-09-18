@@ -4,39 +4,31 @@ let inputUSD = document.querySelector("#usd"),
     inputUAH = document.querySelector("#uah");
 
 inputUAH.addEventListener("input", () => {
-    let request = new XMLHttpRequest();
-    request.open("GET", "js/current.json");
-    request.setRequestHeader('Content-type', "application/json; charset=utf-8");
-    request.send();
-
-    request.addEventListener("load", () => {
-        if (request.status === 200) {
-            let response = JSON.parse(request.response);
-
-            inputUSD.value = (+inputUAH.value / response.current.usd).toFixed(2);
+    fetch("js/current.json", {
+        method: "GET",
+        headers: {
+            'Content-type': "application/json"
         }
-        else {
+    })
+        .then(item => item.json())
+        .then(item => inputUSD.value = (+inputUAH.value / item.current.usd).toFixed(2))
+        .catch(item => {
             inputUSD.value = "Что-то пошло не так";
             inputUSD.style.border = "1px solid red";
-        }
-    });
+        });
 });
 inputUSD.addEventListener("input", () => {
-    let request = new XMLHttpRequest();
-    request.open("GET", "js/current.json");
-    request.setRequestHeader('Content-type', "application/json; charset=utf-8");
-    request.send();
-
-    request.addEventListener("load", () => {
-        if (request.status === 200) {
-            let response = JSON.parse(request.response);
-
-            inputUAH.value = (+inputUSD.value * response.current.usd).toFixed(2);
+    fetch("js/current.json", {
+        method: "GET",
+        headers: {
+            'Content-type': "application/json"
         }
-        else {
+    })
+        .then(item => item.json())
+        .then(item => inputUAH.value = (+inputUSD.value * item.current.usd).toFixed(2))
+        .catch(item => {
             inputUAH.value = "Что-то пошло не так";
             inputUAH.style.border = "1px solid red";
-        }
-    });
-});
+        });
 
+});

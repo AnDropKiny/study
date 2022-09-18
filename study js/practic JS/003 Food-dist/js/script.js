@@ -34,7 +34,7 @@ window.addEventListener("load", () => {
     });
     // Timer 
 
-    let deadline = "2022-09-07";
+    let deadline = "2022-09-20";
 
     function getTimeRemaining(endtime) {
         let days, hours,
@@ -63,7 +63,7 @@ window.addEventListener("load", () => {
         if (num >= 0 && num < 10) {
             return `0${num}`;
         }
-        else return num;
+        else { return num; }
     }
 
     function setClock(parent, endtime) {
@@ -135,17 +135,16 @@ window.addEventListener("load", () => {
     let container = menuField.querySelector(".container");
 
     class ItemsMenu {
-        constructor(img, name, description, price, menuClass, ...classes) {
+        constructor(img, altimg, name, description, price, ...classes) {
             this.name = name;
             this.description = description;
-            this.price = price;
+            this.price = price * 40;
             this.img = img;
-            this.menuClass = menuClass;
+            this.altimg = altimg;
             this.classes = classes;
         }
 
         createMenuItem() {
-            let totalPrice = this.price * 30;
             let divItem = document.createElement("div");
             if (this.classes.length === 0) {
                 this.classes = "menu__item";
@@ -153,25 +152,30 @@ window.addEventListener("load", () => {
             } else {
                 this.classes.forEach(className => divItem.classList.add(className));
             }
-            divItem.insertAdjacentHTML("afterbegin", `<img src=${this.img} alt=${this.menuClass}>
+            divItem.insertAdjacentHTML("afterbegin", `<img src=${this.img} alt=${this.altimg}>
             <h3 class="menu__item-subtitle">${this.name}</h3>  <div class="menu__item-descr">${this.description}</div>
         <div class="menu__item-divider"></div>  <div class="menu__item-price">
-        <div class="menu__item-cost">Цена: ${totalPrice}грн</div>
+        <div class="menu__item-cost">Цена: </div>
         <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
     </div>`);
 
             container.append(divItem);
         }
     }
+    let getData = async (url) => {
+        let res = await fetch(url);
+        if (!res.ok) {
+            throw new Error(`Невозможно получить данные ${url}, статус ошибки ${res.status}`);
+        }
 
-    let vegyDescr = 'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!';
-    let eliteDescr = 'В меню “Премиум” - мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!';
-    let postDescr = 'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.';
+        return await res.json();
+    };
 
-    let vegyItem = new ItemsMenu("img/tabs/vegy.jpg", 'Меню "Фитнес"', vegyDescr, 229, "vegy").createMenuItem();
-    let eliteItem = new ItemsMenu("img/tabs/elite.jpg", 'Меню “Премиум”', eliteDescr, 550, "elite").createMenuItem();
-    let postItem = new ItemsMenu("img/tabs/post.jpg", 'Меню "Постное"', postDescr, 430, "post").createMenuItem();
-
+    getData("http://localhost:3000/menu")
+        .then(data => data.forEach(({ img, altimg, title, descr, price }) => {
+            new ItemsMenu(img, altimg, title, descr, price).createMenuItem();
+        })
+        );
     // post request
 
     let forms = document.querySelectorAll("form");
@@ -183,10 +187,21 @@ window.addEventListener("load", () => {
     };
 
     forms.forEach(form => {
-        postData(form);
+        bindPostData(form);
     });
 
-    function postData(form) {
+    let postData = async (url, data) => {
+        let res = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Content-type': "application/json"
+            },
+            body: data
+        });
+        return await res.json();
+    };
+
+    function bindPostData(form) {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             let statusMessage = document.createElement("img");
@@ -197,21 +212,9 @@ window.addEventListener("load", () => {
             `;
             form.insertAdjacentElement('afterend', statusMessage);
             let formData = new FormData(form);
+            let json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            let obj = {};
-
-            formData.forEach((value, key) => {
-                obj[key] = value;
-            });
-
-            fetch("server.php", {
-                method: "POST",
-                headers: {
-                    'Content-type': "application/json"
-                },
-                body: JSON.stringify(obj)
-            })
-                .then(data => data.text())
+            postData("http://localhost:3000/requests", json)
                 .then(data => {
                     console.log(data);
                     showThxModal(message.success);
@@ -222,10 +225,6 @@ window.addEventListener("load", () => {
                 }).finally(() => {
                     form.reset();
                 });
-
-
-
-
         });
     }
     function showThxModal(message) {
@@ -251,4 +250,201 @@ window.addEventListener("load", () => {
             closeModal();
         }, 4000);
     }
+
+    // slider 
+    let slides = document.querySelectorAll(".offer__slide"),
+        slider = document.querySelector(".offer__slider"),
+        prev = document.querySelector(".offer__slider-prev"),
+        next = document.querySelector(".offer__slider-next"),
+        currentIndex = document.querySelector("#current"),
+        total = document.querySelector("#total"),
+        slidesWrapper = document.querySelector(".offer__slider-wrapper"),
+        slidesInner = document.querySelector(".offer__slider-inner"),
+        width = window.getComputedStyle(slidesWrapper).width;
+
+    let sliderIndex = 1;
+    let offset = 0;
+
+    function switchSlide() {
+        slidesInner.style.transform = `translateX(-${offset}px)`;
+
+        if (slides.length < 10) {
+            total.textContent = `0${slides.length}`;
+            currentIndex.textContent = `0${sliderIndex}`;
+        }
+        else {
+            total.textContent = slides.length;
+            currentIndex.textContent = sliderIndex;
+        }
+    }
+    switchSlide();
+    slidesInner.style.width = 100 * slides.length + "%";
+    slidesInner.style.display = "flex";
+    slidesInner.style.transition = '0.5s all';
+
+    slidesWrapper.style.overflow = "hidden";
+
+
+    slides.forEach(slide => {
+        slide.style.width = width;
+    });
+
+    slider.style.position = "relative";
+
+    let indicators = document.createElement("ol"),
+        dots = [];
+    indicators.classList.add("carousel-indicators");
+    slider.append(indicators);
+
+
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement("li");
+        dot.setAttribute('data-slide-to', i + 1);
+        dot.classList.add('dot');
+
+        if (i == 0) {
+            dot.style.opacity = 1;
+        }
+        indicators.append(dot);
+        dots.push(dot);
+    }
+    function switchDotOpacity() {
+        dots.forEach(dot => dot.style.opacity = '0.5');
+        dots[sliderIndex - 1].style.opacity = 1;
+    }
+
+    next.addEventListener("click", () => {
+        if (offset == +width.replace(/\d/g, '') * (slides.length - 1)) {
+            offset = 0;
+        } else {
+            offset += +width.replace(/\d/g, '');
+        }
+
+        if (sliderIndex == slides.length) {
+            sliderIndex = 1;
+        } else {
+            sliderIndex++;
+        }
+        switchSlide();
+        switchDotOpacity();
+    });
+    prev.addEventListener("click", () => {
+        if (offset == 0) {
+            offset = +width.replace(/\d/g, '') * (slides.length - 1);
+        } else {
+            offset -= +width.replace(/\d/g, '');
+        }
+
+        if (sliderIndex == 1) {
+            sliderIndex = slides.length;
+        } else {
+            sliderIndex--;
+        }
+        switchSlide();
+        switchDotOpacity();
+    });
+
+    dots.forEach(dot => {
+        dot.addEventListener("click", (e) => {
+            const slideTo = e.target.getAttribute("data-slide-to");
+            sliderIndex = slideTo;
+            offset = +width.replace(/\d/g, '') * (slideTo - 1);
+
+            switchSlide();
+            switchDotOpacity();
+        });
+    });
+
+    /// Calc
+
+    let result = document.querySelector(".calculating__result span");
+    let sex = 'female',
+        height, weight, age,
+        ratio = 1.375;
+
+    function calcTotal() {
+        if (!sex || !height || !weight || !age || !ratio) {
+            result.style.fontSize = "18px";
+            result.style.color = "red";
+            result.textContent = "Заполните значения для получения";
+            return;
+        }
+
+        if (sex === "female") {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+            result.style.fontSize = "";
+            result.style.color = "";
+        }
+        else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+            result.style.fontSize = "";
+            result.style.color = "";
+        }
+    }
+    function getStaticInformation(parentElem, classActive) {
+        let elements = document.querySelectorAll(`${parentElem} div`);
+
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                elements.forEach(elem => {
+                    elem.classList.remove(classActive);
+                });
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio');
+                    e.target.classList.add(classActive);
+                    calcTotal();
+                }
+                else if (e.target.getAttribute('id')) {
+                    sex = e.target.getAttribute('id');
+                    e.target.classList.add(classActive);
+                    calcTotal();
+                }
+                console.log(sex, ratio);
+            });
+        });
+    }
+    getStaticInformation('#gender', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big', 'calculating__choose-item_active');
+
+    function getDynamicInformation(parentElem) {
+        let element = document.querySelector(parentElem);
+        element.addEventListener("input", (e) => {
+            switch (e.target.getAttribute('id')) {
+                case 'height':
+                    if (+element.value) {
+                        height = element.value;
+                        element.style.border = "";
+                    }
+                    else {
+                        element.style.border = "1px solid red";
+                        height = null;
+                    }
+                    break;
+                case 'weight':
+                    if (+element.value) {
+                        weight = element.value;
+                        element.style.border = "";
+                    }
+                    else {
+                        element.style.border = "1px solid red";
+                        weight = null;
+                    }
+                    break;
+                case 'age':
+                    if (+element.value) {
+                        age = element.value;
+                        element.style.border = "";
+                    }
+                    else {
+                        element.style.border = "1px solid red";
+                        age = null;
+                    }
+                    break;
+            }
+            calcTotal();
+        });
+    }
+    getDynamicInformation('#height');
+    getDynamicInformation('#weight');
+    getDynamicInformation('#age');
 });
