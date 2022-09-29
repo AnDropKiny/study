@@ -1,10 +1,9 @@
-function timer() {
-    let deadline = "2022-09-20";
+function timer(id, deadline) {
 
-    function getTimeRemaining(endtime) {
+    function getTimeRemaining(deadline) {
         let days, hours,
             minutes, seconds;
-        let t = Date.parse(endtime) - Date.parse(new Date());
+        let t = Date.parse(deadline) - Date.parse(new Date());
         if (t <= 0) {
             days = 0;
             hours = 0;
@@ -12,7 +11,7 @@ function timer() {
             seconds = 0;
         } else {
             days = Math.floor(t / (1000 * 60 * 60 * 24));
-            hours = Math.floor(t / (1000 * 60 * 60) % 60) - 3;
+            hours = Math.floor(t / (1000 * 60 * 60) % 24) - 3;
             minutes = Math.floor(t / (1000 * 60) % 60);
             seconds = Math.floor((t / 1000) % 60);
         }
@@ -31,7 +30,7 @@ function timer() {
         else { return num; }
     }
 
-    function setClock(parent, endtime) {
+    function setClock(parent, deadline) {
         let timer = document.querySelector(parent),
             days = timer.querySelector("#days"),
             hours = timer.querySelector("#hours"),
@@ -41,7 +40,7 @@ function timer() {
         updateClock();
 
         function updateClock() {
-            let timer = getTimeRemaining(endtime);
+            let timer = getTimeRemaining(deadline);
             days.innerHTML = getZero(timer.days);
             hours.innerHTML = getZero(timer.hours);
             minutes.innerHTML = getZero(timer.minutes);
@@ -51,6 +50,6 @@ function timer() {
             }
         }
     }
-    setClock(".timer", deadline);
+    setClock(id, deadline);
 }
-module.exports = timer;
+export default timer;

@@ -24,3 +24,4 @@ class MyDick {
 let bigDick = new MyDick(19, 6, 50);
 
 bigDick.showDick();
+

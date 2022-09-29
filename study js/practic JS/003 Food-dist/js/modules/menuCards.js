@@ -1,3 +1,5 @@
+import { getData } from '../services/services';
+
 function menuCards() {
     let menuField = document.querySelector(".menu__field");
     let container = menuField.querySelector(".container");
@@ -30,14 +32,6 @@ function menuCards() {
             container.append(divItem);
         }
     }
-    let getData = async (url) => {
-        let res = await fetch(url);
-        if (!res.ok) {
-            throw new Error(`Невозможно получить данные ${url}, статус ошибки ${res.status}`);
-        }
-
-        return await res.json();
-    };
 
     getData("http://localhost:3000/menu")
         .then(data => data.forEach(({ img, altimg, title, descr, price }) => {
@@ -45,4 +39,4 @@ function menuCards() {
         })
         );
 }
-module.exports = menuCards;
+export default menuCards;
