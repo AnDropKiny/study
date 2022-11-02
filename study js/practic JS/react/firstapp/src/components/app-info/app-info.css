@@ -1,0 +1,10 @@
+.app-info {
+    padding: 25px;
+    background-color: rgb(39, 36, 36);
+    background-image: url('./img/logo.png');
+    background-repeat: no-repeat;
+    background-position: right;
+    border-radius: 4px;
+    box-shadow: 15px 15px 30px rgb(0, 0, 0, .15);
+    color: #fff;
+}

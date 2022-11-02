@@ -1,0 +1,25 @@
+/* .main-page {
+    display: none;
+
+}
+
+.coffee-page {
+    display: none;
+}
+
+.coffee-item-page {
+    display: block
+}
+
+.for-pleasure {
+    display: none
+} */
+
+.main-page,
+.coffee-page,
+.coffee-item-page,
+.for-pleasure {
+    font-family: 'Merienda';
+    margin: 0 auto;
+    max-width: 1440px;
+}

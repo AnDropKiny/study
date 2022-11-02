@@ -1,0 +1,16 @@
+.app-list {
+    margin-top: 30px;
+    background-color: rgb(39, 36, 36);
+    border-radius: 4px;
+    box-shadow: 15px 15px 30px rgba(0, 0, 0, .15);
+    color: #fff;
+}
+
+.message {
+    margin: 30px;
+    border-radius: 4px;
+    color: rgb(39, 36, 36);
+    text-align: center;
+    font-style: italic;
+    font-weight: lighter;
+}
