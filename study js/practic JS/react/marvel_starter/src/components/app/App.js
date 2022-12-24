@@ -1,48 +1,72 @@
 import AppHeader from "../appHeader/AppHeader";
-import RandomChar from "../randomChar/RandomChar";
-import CharList from "../charList/CharList";
-import CharInfo from "../charInfo/CharInfo";
 import ErrorBoundery from "../errorBoundary/ErrorBoundery";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import Spinner from "../spinner/Spinner";
 
-import decoration from '../../resources/img/vision.png';
-import { Component } from "react";
+const MainPage = lazy(() => import("../pages/MainPage"));
+const ComicsPage = lazy(() => import("../pages/ComicsPage"));
+const ErrorMsg = lazy(() => import('../errorMsg/ErrorMsg'));
+const SinglePage = lazy(() => import("../pages/SinglePage"));
+const SingleCharPage = lazy(() => import("../pages/singleCharacterLayout/SingleCharacterLayout"));
+const SingleComicPage = lazy(() => import("../pages/singleComicLayout/SingleComicLayout"));
 
-class App extends Component {
+const App = () => {
 
-    state = {
-        selectedChar: null
-    }
-
-    onCharSelected = (id) => {
-        this.setState({
-            selectedChar: id
-        })
-    }
-
-    render() {
-
-
-        return (
+    return (
+        <BrowserRouter>
             <div className="app">
                 <AppHeader />
                 <main>
-                    <ErrorBoundery>
-                        <RandomChar />
-                    </ErrorBoundery>
-                    <div className="char__content">
-                        <ErrorBoundery>
-                            <CharList onCharSelected={this.onCharSelected} />
-                        </ErrorBoundery>
-                        <ErrorBoundery>
-                            <CharInfo charId={this.state.selectedChar} />
-                        </ErrorBoundery>
+                    <Suspense fallback={<Spinner />}>
+                        <Routes>
+                            <Route path="/" element={
 
-                    </div>
-                    <img className="bg-decoration" src={decoration} alt="vision" />
+                                <ErrorBoundery>
+                                    <MainPage />
+                                </ErrorBoundery>
+
+                            } />
+
+                            <Route path="/comics" element={
+
+                                <ErrorBoundery>
+                                    <ComicsPage />
+                                </ErrorBoundery>
+                            } />
+                            <Route path="/comics/:id" element={
+
+                                <ErrorBoundery>
+                                    <SinglePage BaseComponent={SingleComicPage} dataType='comic' />
+                                </ErrorBoundery>
+
+                            } />
+                            <Route path="/characters/:id" element={
+
+                                <ErrorBoundery>
+                                    <SinglePage BaseComponent={SingleCharPage} dataType='character' />
+                                </ErrorBoundery>
+
+                            } />
+
+
+                            <Route path="*" element={
+                                <>
+                                    <h1>404 NOT FOUND</h1>
+                                    <ErrorMsg />
+
+                                </>
+                            } />
+                        </Routes>
+                    </Suspense>
+
                 </main>
             </div>
-        )
-    }
+        </BrowserRouter>
+    )
+
 }
+
+
 
 export default App;

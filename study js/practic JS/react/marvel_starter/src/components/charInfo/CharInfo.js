@@ -1,85 +1,39 @@
 import './charInfo.scss';
-import MarvelService from '../../services/MarvelService';
-import { Component } from 'react';
+import useMarvelService from '../../services/MarvelService';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-import Skeleton from '../skeleton/Skeleton'
-import ErrorMsg from '../errorMsg/ErrorMsg';
-import Spinner from '../spinner/Spinner';
+import setContent from '../utils/setContent';
+const CharInfo = (props) => {
 
-class CharInfo extends Component {
-    state = {
-        char: null,
-        loading: false,
-        error: false,
+    const [char, setChar] = useState(null);
 
+    const { getCharactersById, clearError, procces, setProcces } = useMarvelService();
 
-    }
-    marvelService = new MarvelService();
+    useEffect(() => {
+        updateChar();
+        // eslint-disable-next-line
+    }, [props.charId])
 
-    componentDidMount() {
-        this.updateChar();
-    }
-    componentDidUpdate(prevProps) {
-        if (this.props.charId !== prevProps.charId) {
-            this.updateChar();
-        }
-    }
-
-
-    onCharLoaded = (char) => {
-        this.setState(
-            {
-                char,
-                loading: false
-            })
-    }
-
-    onCharLoading = () => {
-        this.setState(
-            {
-                loading: true
-            })
-    }
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
-    }
-
-    updateChar = () => {
-        const { charId } = this.props;
+    const updateChar = () => {
+        const { charId } = props;
         if (!charId) {
             return;
         }
-        this.onCharLoading();
-
-        this.marvelService
-            .getCharactersById(charId)
-            .then(this.onCharLoaded)
-            .catch(this.onError)
+        clearError();
+        getCharactersById(charId)
+            .then(setChar)
+            .then(() => setProcces('loaded'))
     }
-    render() {
-        const { char, error, loading } = this.state;
-        const skeleton = error || loading || char ? null : <Skeleton />;
-        const errorMsg = error ? <ErrorMsg /> : null,
-            spinner = loading ? <Spinner /> : null,
-            content = !(loading || error || !char) ? <View char={char} /> : null;
-
-        return (
-            <div className="char__info">
-                {skeleton}
-                {errorMsg}
-                {spinner}
-                {content}
-            </div>
-        )
-    }
+    return (
+        <div className="char__info">
+            {setContent(procces, View, char)}
+        </div>
+    )
 }
 
-const View = ({ char }) => {
-    const { name, description, thumbnail, homepage, wiki, comics } = char;
+const View = ({ data }) => {
+    const { name, description, thumbnail, homepage, wiki, comics } = data;
     let objectFit = thumbnail.indexOf('image_not_available') !== -1 ? { objectFit: "contain" } : { objectFit: "cover" }
     return (
         <>
