@@ -1,0 +1,19 @@
+.for-pleasure .main {
+    height: 1155px;
+}
+
+.for-pleasure .footer {
+    filter: none;
+}
+
+.for-pleasure .coffee-items-box {
+    margin: 30px auto;
+}
+
+.for-pleasure .drink-coffee-logo {
+    background: url(./img/CoffeeLogo.png);
+}
+
+.for-pleasure .coffee-header {
+    background: url(./img/ForPleasureLogo.png);
+}
